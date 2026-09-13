@@ -1,0 +1,171 @@
+{
+  "benchmark": "/home/arynothic/code_arynothic/project/craxis_theLLM/evals/craxis_bench_v0.jsonl",
+  "run": "evals/runs/example_base_3b.jsonl",
+  "missing_cases": [],
+  "case_scores": [
+    {
+      "id": "bench-triage-001",
+      "task": "alert_triage",
+      "verdict_correct": true,
+      "mitre_f1": 0.5,
+      "evidence_rate": 1.0,
+      "hallucination": false,
+      "format_compliance": 0.8333333333333334
+    },
+    {
+      "id": "bench-triage-002",
+      "task": "alert_triage",
+      "verdict_correct": true,
+      "mitre_f1": 0.6666666666666666,
+      "evidence_rate": 1.0,
+      "hallucination": false,
+      "format_compliance": 0.8333333333333334
+    },
+    {
+      "id": "bench-triage-003",
+      "task": "alert_triage",
+      "verdict_correct": true,
+      "mitre_f1": 0.5,
+      "evidence_rate": 0.3333333333333333,
+      "hallucination": false,
+      "format_compliance": 0.8333333333333334
+    },
+    {
+      "id": "bench-triage-004",
+      "task": "alert_triage",
+      "verdict_correct": true,
+      "mitre_f1": 0.5,
+      "evidence_rate": 1.0,
+      "hallucination": false,
+      "format_compliance": 0.8333333333333334
+    },
+    {
+      "id": "bench-triage-005",
+      "task": "alert_triage",
+      "verdict_correct": true,
+      "mitre_f1": 0.8,
+      "evidence_rate": 1.0,
+      "hallucination": false,
+      "format_compliance": 0.8333333333333334
+    },
+    {
+      "id": "bench-attack-001",
+      "task": "attack_mapping",
+      "mitre_f1": 0.6666666666666666,
+      "detection_rate": 0.6666666666666666,
+      "hallucination": false,
+      "format_compliance": 0.6666666666666666
+    },
+    {
+      "id": "bench-attack-002",
+      "task": "attack_mapping",
+      "mitre_f1": 0.6666666666666666,
+      "detection_rate": 1.0,
+      "hallucination": false,
+      "format_compliance": 0.6666666666666666
+    },
+    {
+      "id": "bench-attack-003",
+      "task": "attack_mapping",
+      "mitre_f1": 0.4,
+      "detection_rate": 1.0,
+      "hallucination": false,
+      "format_compliance": 0.6666666666666666
+    },
+    {
+      "id": "bench-vuln-001",
+      "task": "vuln_analysis",
+      "cwe_f1": 0.6666666666666666,
+      "severity_correct": true,
+      "remediation_rate": 0.6666666666666666,
+      "hallucination": false
+    },
+    {
+      "id": "bench-vuln-002",
+      "task": "vuln_analysis",
+      "cwe_f1": 0.5,
+      "severity_correct": true,
+      "remediation_rate": 0.6666666666666666,
+      "hallucination": false
+    },
+    {
+      "id": "bench-detect-001",
+      "task": "detection_explain",
+      "concept_rate": 0.5,
+      "mitre_f1": 0.6666666666666666,
+      "hallucination": false
+    },
+    {
+      "id": "bench-summary-001",
+      "task": "incident_summary",
+      "impact_rate": 0.75,
+      "ioc_rate": 1.0,
+      "mitre_f1": 0.7499999999999999,
+      "hallucination": false
+    }
+  ],
+  "summary": {
+    "num_cases": 12,
+    "metrics": {
+      "mitre_f1": 0.6117,
+      "evidence_rate": 0.8667,
+      "format_compliance": 0.7708,
+      "detection_rate": 0.8889,
+      "cwe_f1": 0.5833,
+      "remediation_rate": 0.6667,
+      "concept_rate": 0.5,
+      "impact_rate": 0.75,
+      "ioc_rate": 1.0,
+      "verdict_correct": 1.0,
+      "hallucination": 0.0,
+      "severity_correct": 1.0
+    },
+    "by_task": {
+      "alert_triage": {
+        "num_cases": 5,
+        "metrics": {
+          "mitre_f1": 0.5933,
+          "evidence_rate": 0.8667,
+          "format_compliance": 0.8333,
+          "verdict_correct": 1.0,
+          "hallucination": 0.0
+        }
+      },
+      "attack_mapping": {
+        "num_cases": 3,
+        "metrics": {
+          "mitre_f1": 0.5778,
+          "detection_rate": 0.8889,
+          "format_compliance": 0.6667,
+          "hallucination": 0.0
+        }
+      },
+      "vuln_analysis": {
+        "num_cases": 2,
+        "metrics": {
+          "cwe_f1": 0.5833,
+          "remediation_rate": 0.6667,
+          "severity_correct": 1.0,
+          "hallucination": 0.0
+        }
+      },
+      "detection_explain": {
+        "num_cases": 1,
+        "metrics": {
+          "concept_rate": 0.5,
+          "mitre_f1": 0.6667,
+          "hallucination": 0.0
+        }
+      },
+      "incident_summary": {
+        "num_cases": 1,
+        "metrics": {
+          "impact_rate": 0.75,
+          "ioc_rate": 1.0,
+          "mitre_f1": 0.75,
+          "hallucination": 0.0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+Summarize this security incident timeline for a SOC lead:
+
+<untrusted_data>
+{input_json}
+</untrusted_data>
+
+Respond with sections:
+Executive Summary:
+Impact:
+IOCs:
+MITRE ATT&CK:
+Recommended Actions:

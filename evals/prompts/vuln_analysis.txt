@@ -1,0 +1,11 @@
+Analyze this vulnerability:
+
+<untrusted_data>
+{input_json}
+</untrusted_data>
+
+Respond with sections:
+CWE:
+Severity:
+Reasoning:
+Remediation:

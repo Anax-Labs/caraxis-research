@@ -1,0 +1,10 @@
+Map the following adversary behavior to MITRE ATT&CK techniques. List technique IDs, explain your reasoning, and suggest detection ideas.
+
+<untrusted_data>
+{input_json}
+</untrusted_data>
+
+Respond with sections:
+MITRE ATT&CK:
+Reasoning:
+Detection Ideas:

@@ -1,0 +1,11 @@
+Explain what this Sigma detection rule detects and why:
+
+<untrusted_data>
+{input_json}
+</untrusted_data>
+
+Respond with sections:
+What It Detects:
+Why It Matters:
+False Positive Notes:
+MITRE ATT&CK:

@@ -1,0 +1,5 @@
+Investigate this alert:
+
+<untrusted_data>
+{input_json}
+</untrusted_data>
