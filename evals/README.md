@@ -1,12 +1,12 @@
-# Craxis Evals
+# Caraxis Evals
 
-Evaluation harness for comparing base vs fine-tuned Craxis models.
+Evaluation harness for comparing base vs fine-tuned Caraxis models.
 
 ## Layout
 
 ```text
 evals/
-  craxis_bench_v0.jsonl   # Primary product benchmark (12 cases)
+  caraxis_bench_v0.jsonl   # Primary product benchmark (12 cases)
   golden_set.jsonl        # Frozen regression set (5 cases)
   seceval_subset.jsonl    # Small MCQ knowledge check (10 cases)
   prompts/                # Prompt templates per task
@@ -28,7 +28,7 @@ python evals/score.py --run evals/runs/example_base_3b.jsonl
 Export prompts for manual testing in Ollama or a notebook:
 
 ```bash
-python evals/run_eval.py --bench evals/craxis_bench_v0.jsonl --export-prompts --output evals/runs/prompts.jsonl
+python evals/run_eval.py --bench evals/caraxis_bench_v0.jsonl --export-prompts --output evals/runs/prompts.jsonl
 ```
 
 ## Full workflow
@@ -37,7 +37,7 @@ python evals/run_eval.py --bench evals/craxis_bench_v0.jsonl --export-prompts --
 
 ```bash
 python evals/run_eval.py \
-  --bench evals/craxis_bench_v0.jsonl \
+  --bench evals/caraxis_bench_v0.jsonl \
   --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit \
   --output evals/runs/base_3b.jsonl
 ```
@@ -96,14 +96,14 @@ You can also produce runs manually from Ollama or another UI, as long as `id` an
 
 ## Success bar for first fine-tune
 
-- Measurable improvement on `craxis_bench_v0.jsonl` vs base
+- Measurable improvement on `caraxis_bench_v0.jsonl` vs base
 - No large drop on `seceval_subset.jsonl`
 - Lower `hallucination` or higher `evidence_rate` on triage cases
 - Golden set should not regress after model changes
 
 ## Adding cases
 
-1. Add a new JSON object to `craxis_bench_v0.jsonl`
+1. Add a new JSON object to `caraxis_bench_v0.jsonl`
 2. Keep `id`, `task`, `input`, and `gold` fields
 3. Do not duplicate training examples
 4. For injection tests, put malicious text inside `input`, not in instructions

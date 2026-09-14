@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare two scored Craxis eval reports."""
+"""Compare two scored Caraxis eval reports."""
 
 from __future__ import annotations
 
@@ -81,7 +81,7 @@ def compare_reports(base: dict[str, Any], cand: dict[str, Any]) -> dict[str, Any
 
 def to_markdown(comparison: dict[str, Any]) -> str:
     lines = [
-        "# Craxis Eval Comparison",
+        "# Caraxis Eval Comparison",
         "",
         f"- Baseline: `{comparison['baseline_run']}`",
         f"- Candidate: `{comparison['candidate_run']}`",
@@ -116,7 +116,7 @@ def to_markdown(comparison: dict[str, Any]) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Compare two Craxis eval score reports.")
+    parser = argparse.ArgumentParser(description="Compare two Caraxis eval score reports.")
     parser.add_argument("--baseline", type=Path, required=True, help="Baseline score report JSON")
     parser.add_argument("--candidate", type=Path, required=True, help="Candidate score report JSON")
     parser.add_argument(

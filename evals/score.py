@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Score Craxis eval runs against benchmark gold labels."""
+"""Score Caraxis eval runs against benchmark gold labels."""
 
 from __future__ import annotations
 
@@ -254,11 +254,11 @@ def score_run(bench_path: Path, run_path: Path) -> dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Score a Craxis eval run.")
+    parser = argparse.ArgumentParser(description="Score a Caraxis eval run.")
     parser.add_argument(
         "--bench",
         type=Path,
-        default=EVALS_DIR / "craxis_bench_v0.jsonl",
+        default=EVALS_DIR / "caraxis_bench_v0.jsonl",
         help="Benchmark JSONL path",
     )
     parser.add_argument(

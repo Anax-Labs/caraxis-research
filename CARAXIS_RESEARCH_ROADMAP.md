@@ -1,6 +1,6 @@
-# Craxis Research Roadmap
+# Caraxis Research Roadmap
 
-**Craxis** is an AI cybersecurity product whose long-term goal is a security analyst that monitors authorized environments, detects suspicious activity, identifies vulnerabilities, investigates incidents, correlates evidence, and notifies security teams.
+**Caraxis** is an AI cybersecurity product whose long-term goal is a security analyst that monitors authorized environments, detects suspicious activity, identifies vulnerabilities, investigates incidents, correlates evidence, and notifies security teams.
 
 This document is a practical research roadmap for a **solo developer** with an **RTX 4050 (6 GB VRAM)** and **Google Colab** access. It covers Phase 1 (fine-tuning) through Phase 2 (minimal AI security analyst prototype).
 
@@ -12,16 +12,16 @@ This document is a practical research roadmap for a **solo developer** with an *
 |---|---|
 | **Which model to start with?** | `unsloth/Llama-3.2-3B-Instruct-bnb-4bit` |
 | **How to train it?** | QLoRA + SFT via Unsloth (not full fine-tuning) |
-| **What dataset to build?** | `Craxis-Analyst-v1` — 300–500 synthetic instruction pairs teaching analyst behavior |
-| **How to know it worked?** | `Craxis-Bench` (50 held-out scenarios) + SecEval subset; target ≥10% improvement |
+| **What dataset to build?** | `Caraxis-Analyst-v1` — 300–500 synthetic instruction pairs teaching analyst behavior |
+| **How to know it worked?** | `Caraxis-Bench` (50 held-out scenarios) + SecEval subset; target ≥10% improvement |
 | **What to build next (Phase 2)?** | Sigma detection → RAG (MITRE/NVD) → 5 read-only tools → agent loop → Slack |
 
 ```mermaid
 flowchart LR
     subgraph phase1 [Phase 1]
         M["Llama-3.2-3B-Instruct\nunsloth bnb-4bit"]
-        D["Craxis-Analyst-v1\n300-500 examples"]
-        B["Craxis-Bench\n50 held-out scenarios"]
+        D["Caraxis-Analyst-v1\n300-500 examples"]
+        B["Caraxis-Bench\n50 held-out scenarios"]
         M --> FT["QLoRA SFT\nRTX 4050"]
         D --> FT
         FT --> E["Evaluate vs base\n+ SecEval subset"]
@@ -48,13 +48,13 @@ flowchart LR
 
 **`unsloth/Llama-3.2-3B-Instruct-bnb-4bit`** (underlying weights: `meta-llama/Llama-3.2-3B-Instruct`)
 
-### Why this model is suitable for Craxis
+### Why this model is suitable for Caraxis
 
 1. **Hardware fit.** Unsloth lists 3B QLoRA at ~3.5 GB VRAM minimum — the largest model size that trains *comfortably* on a 6 GB RTX 4050. Seven- to eight-billion-parameter models are possible but fragile locally (see Section 4).
 
 2. **Product alignment.** Meta's Llama 3.2 model card states the instruct models are optimized for *"agentic retrieval and summarization tasks"* — directly relevant to alert investigation, evidence correlation, and reporting.
 
-3. **Commercial viability.** Llama 3.2 uses the [Llama 3.2 Community License](https://developer.meta.com/ai/llama3_2/license/), which permits commercial use (with attribution: display "Built with Llama"; prefix distributed model names with "Llama"). Craxis is planned as a product, so license matters from day one.
+3. **Commercial viability.** Llama 3.2 uses the [Llama 3.2 Community License](https://developer.meta.com/ai/llama3_2/license/), which permits commercial use (with attribution: display "Built with Llama"; prefix distributed model names with "Llama"). Caraxis is planned as a product, so license matters from day one.
 
 4. **Ecosystem.** Unsloth provides an official [Colab notebook for Llama 3.2 3B](https://colab.research.google.com/drive/1T5-zKWM_5OD21QHwXHiV9ixTRR7k3iB9?usp=sharing), extensive docs, and pre-quantized `bnb-4bit` checkpoints that skip manual setup.
 
@@ -79,7 +79,7 @@ flowchart LR
 
 ## 2. Alternative Models
 
-Compare your primary model against these three baselines on the **same dataset and Craxis-Bench**:
+Compare your primary model against these three baselines on the **same dataset and Caraxis-Bench**:
 
 | Model | Role | Checkpoint | License | Why compare |
 |---|---|---|---|---|
@@ -104,7 +104,7 @@ Compare your primary model against these three baselines on the **same dataset a
 
 **QLoRA** (4-bit quantized base weights + trainable LoRA adapters) combined with **SFT** (Supervised Fine-Tuning on instruction-response pairs).
 
-| Method | Use for Craxis? | Reason |
+| Method | Use for Caraxis? | Reason |
 |---|---|---|
 | Full fine-tuning | **No** | ~28+ GB VRAM for 7B; unnecessary for domain adaptation |
 | LoRA (16-bit base) | **No** on 4050 | ~8 GB VRAM for 3B per Unsloth |
@@ -118,7 +118,7 @@ Compare your primary model against these three baselines on the **same dataset a
 - **QLoRA** = LoRA on top of a 4-bit frozen base model. This is what makes 3B–8B training possible on your hardware.
 - **Full fine-tuning** = update every parameter. Do not attempt on 6 GB VRAM.
 
-**Do not train from scratch.** Continued pretraining is a multi-GPU-cluster endeavor. Craxis needs domain *behavior*, not a new foundation model.
+**Do not train from scratch.** Continued pretraining is a multi-GPU-cluster endeavor. Caraxis needs domain *behavior*, not a new foundation model.
 
 ---
 
@@ -277,7 +277,7 @@ Expect **50–200 MB** on disk for LoRA adapters. Full merged 16-bit weights are
 
 ## 7. Dataset Strategy
 
-### Best dataset type for Craxis
+### Best dataset type for Caraxis
 
 **Instruction-tuning pairs that teach security analyst behavior** — not raw dumps of MITRE pages or CVE text.
 
@@ -387,14 +387,14 @@ Use **ShareGPT / chat JSON** with a `messages` array. Unsloth and TRL `SFTTraine
 
 ```json
 {
-  "id": "craxis-00042",
+  "id": "caraxis-00042",
   "task": "alert_triage",
   "source": "synthetic",
   "seed_refs": ["T1110.001", "sigma:ssh_bruteforce"],
   "messages": [
     {
       "role": "system",
-      "content": "You are Craxis, an AI security analyst. Analyze the alert and provide a structured investigation. Always cite evidence before conclusions."
+      "content": "You are Caraxis, an AI security analyst. Analyze the alert and provide a structured investigation. Always cite evidence before conclusions."
     },
     {
       "role": "user",
@@ -438,7 +438,7 @@ Store as JSONL: one object per line in `data/train.jsonl`, `data/val.jsonl`, `da
 | [SecEval](https://huggingface.co/datasets/XuanwuAI/SecEval) MCQ | ~200 held-out questions | Security knowledge breadth |
 | [CTIBench-MCQ](https://huggingface.co/datasets/AI4Sec/cti-bench) | ~100 held-out questions | CTI knowledge |
 
-#### Layer 2: Craxis-Bench (custom, primary)
+#### Layer 2: Caraxis-Bench (custom, primary)
 
 Build **before** your first training run.
 
@@ -449,7 +449,7 @@ Build **before** your first training run.
 | Metrics | Verdict accuracy, ATT&CK F1, evidence citation rate, hallucination rate |
 | Adversarial | 10 scenarios with prompt-injection strings embedded in log fields |
 
-**Success criterion:** ≥10% relative improvement on Craxis-Bench vs base model, plus measurable gain on SecEval subset, with no major regression on general reasoning.
+**Success criterion:** ≥10% relative improvement on Caraxis-Bench vs base model, plus measurable gain on SecEval subset, with no major regression on general reasoning.
 
 #### Layer 3: Qualitative review
 
@@ -462,7 +462,7 @@ Build **before** your first training run.
 3. Save all outputs as JSON for regression testing
 4. Track validation loss during training — if val loss rises while train loss falls, you are overfitting
 
-### Custom benchmark design (Craxis-Bench)
+### Custom benchmark design (Caraxis-Bench)
 
 Each benchmark item should include:
 
@@ -503,14 +503,14 @@ Score with exact match on verdict + F1 on technique IDs + checklist on required 
 
 ### When to add tool calling
 
-**After** first successful fine-tune with measurable Craxis-Bench improvement. Fine-tuning teaches *how to investigate*; tools provide *live evidence*. Adding tools before the model can reason in analyst format wastes engineering effort.
+**After** first successful fine-tune with measurable Caraxis-Bench improvement. Fine-tuning teaches *how to investigate*; tools provide *live evidence*. Adding tools before the model can reason in analyst format wastes engineering effort.
 
 ---
 
 ## 11. What to Do After First Successful Fine-Tune
 
 1. **Export** — Save LoRA adapter; merge to 16-bit or export GGUF (`q4_k_m`) for Ollama
-2. **Benchmark** — Run full Craxis-Bench + SecEval subset; save results JSON
+2. **Benchmark** — Run full Caraxis-Bench + SecEval subset; save results JSON
 3. **Golden set** — Freeze 20 scenarios as permanent regression tests
 4. **Dataset v2** — Fix failure modes; expand to 1,500–2,000 examples
 5. **Scale-up** — Colab: train same dataset on 8B; compare quality vs 3B
@@ -564,7 +564,7 @@ Never mix retrieved content into the system prompt. Treat retrieved text as untr
 flowchart TD
     Logs["Sample auth logs\nJSON/CSV"] --> Sigma["Sigma engine\npySigma, 5-10 rules"]
     Sigma --> Alert["Alert JSON"]
-    Alert --> Agent["Craxis Agent\nfine-tuned 3B/8B"]
+    Alert --> Agent["Caraxis Agent\nfine-tuned 3B/8B"]
     RAG["RAG\nMITRE + NVD"] --> Agent
     Agent --> Tools["Tool loop\nmax 8 steps"]
     Tools --> Agent
@@ -701,7 +701,7 @@ Security telemetry is attacker-controlled input. Apply defense-in-depth per [OWA
 | Loop cap | Max 8 agent iterations; force `submit_verdict` on final turn |
 | No auto-action | Agent recommends actions; human approves all remediation |
 | Audit logging | Log prompts, retrievals, tool calls, responses with timestamps |
-| Adversarial testing | Include 10 prompt-injection scenarios in Craxis-Bench from day one |
+| Adversarial testing | Include 10 prompt-injection scenarios in Caraxis-Bench from day one |
 
 ---
 
@@ -716,11 +716,11 @@ Collect dataset       →  ATT&CK STIX + NVD + Sigma seeds
         ↓
 Clean dataset         →  Dedup, decontaminate, schema-validate
         ↓
-Create benchmark      →  Craxis-Bench v0 (20 scenarios) BEFORE training
+Create benchmark      →  Caraxis-Bench v0 (20 scenarios) BEFORE training
         ↓
 Fine-tune             →  QLoRA SFT on RTX 4050 (pilot 50 → full 500)
         ↓
-Evaluate              →  Base vs fine-tuned on Craxis-Bench + SecEval subset
+Evaluate              →  Base vs fine-tuned on Caraxis-Bench + SecEval subset
         ↓
 Improve dataset/model →  v2 dataset; re-run on base checkpoint; Colab 8B comparison
         ↓
@@ -739,14 +739,14 @@ Reach Phase 2         →  End-to-end prototype with eval harness
 |---|---|---|
 | 1–2 | Environment + pipeline | 50-example smoke test completes on RTX 4050 |
 | 2–3 | Dataset seeds + pilot | 50-example pilot dataset; seed parsers for ATT&CK/NVD/Sigma |
-| 3 | Benchmark | Craxis-Bench v0 (20 scenarios) |
+| 3 | Benchmark | Caraxis-Bench v0 (20 scenarios) |
 | 3–4 | Fine-tune v1 | 500-example training run; adapter saved |
 | 4–5 | Evaluate + iterate | Evaluation report; dataset v2 plan |
 | 5–6 | Colab scale-up | 3B vs 8B comparison report |
 | 7 | RAG | Chroma index over MITRE + NVD |
 | 8 | Tools + agent | 5 tools wired; agent loop with schema validation |
 | 9–10 | Detection pipeline | Sigma → alert → agent → Slack end-to-end |
-| 10–12 | Polish | Craxis-Bench v1 (50+ scenarios); adversarial tests |
+| 10–12 | Polish | Caraxis-Bench v1 (50+ scenarios); adversarial tests |
 
 ---
 
@@ -755,8 +755,8 @@ Reach Phase 2         →  End-to-end prototype with eval harness
 | Phase | Duration | Milestone |
 |---|---|---|
 | Environment + pipeline | 1–2 weeks | 50-example smoke test on RTX 4050 |
-| Dataset v1 + benchmark | 1–2 weeks | 500 examples + 50-scenario Craxis-Bench |
-| Fine-tune + evaluate | 1–2 weeks | Measurable Craxis-Bench improvement |
+| Dataset v1 + benchmark | 1–2 weeks | 500 examples + 50-scenario Caraxis-Bench |
+| Fine-tune + evaluate | 1–2 weeks | Measurable Caraxis-Bench improvement |
 | Scale-up (Colab) | 1 week | 3B vs 8B comparison report |
 | Phase 2 prototype | 3–4 weeks | End-to-end: log → Sigma → agent → Slack |
 | **Total to Phase 2** | **~10–12 weeks** (solo, part-time) | Working analyst prototype |
@@ -774,8 +774,8 @@ Reach Phase 2         →  End-to-end prototype with eval harness
 | LLM-as-detector | Use Sigma rules pre-LLM; LLM investigates alerts, not raw logs |
 | Write/execute tools in Phase 2 | Read-only tools only; human approves all remediation |
 | Trusting verdicts without evidence | Require evidence citations in schema; validate in eval |
-| Ignoring prompt injection | Include adversarial cases in Craxis-Bench from day one |
-| Chasing public benchmark scores | Craxis-Bench (analyst workflow) is the primary metric |
+| Ignoring prompt injection | Include adversarial cases in Caraxis-Bench from day one |
+| Chasing public benchmark scores | Caraxis-Bench (analyst workflow) is the primary metric |
 | Quantity over quality | 500 excellent examples > 10,000 noisy ones |
 | Skipping base-model experiment | CyberPal showed base > instruct for domain SFT; test both |
 | No regression tests | Freeze golden set after first successful fine-tune |
@@ -838,7 +838,7 @@ Reach Phase 2         →  End-to-end prototype with eval harness
 |---|---|---|
 | 1 | Which LLM to start with? | §1 — Llama-3.2-3B-Instruct |
 | 2 | Which 2–3 models to compare? | §2 — 1B, Qwen2.5-3B, Foundation-Sec-8B |
-| 3 | Why suitable for Craxis? | §1 — hardware, license, agentic alignment |
+| 3 | Why suitable for Caraxis? | §1 — hardware, license, agentic alignment |
 | 4 | Exact checkpoint? | §1 — `unsloth/Llama-3.2-3B-Instruct-bnb-4bit` |
 | 5 | Fine-tune on RTX 4050 6 GB? | §4 — yes for 3B; 7B fragile |
 | 6 | When to use Colab? | §4 — 7B+, long context, OOM |
@@ -856,7 +856,7 @@ Reach Phase 2         →  End-to-end prototype with eval harness
 | 18 | Train/val/test split? | §9 — 80/10/10 stratified |
 | 19 | Prevent leakage/contamination? | §9, §10 |
 | 20 | Evaluate base vs fine-tuned? | §10 |
-| 21 | What benchmark to create? | §10 — Craxis-Bench |
+| 21 | What benchmark to create? | §10 — Caraxis-Bench |
 | 22 | If fine-tuning doesn't help? | §10 |
 | 23 | When RAG instead of fine-tuning? | §10, §12 |
 | 24 | When to add tool calling? | §10 — after successful fine-tune |
@@ -877,4 +877,4 @@ Reach Phase 2         →  End-to-end prototype with eval harness
 
 ---
 
-*Document version: 1.0 — Created for the Craxis project. Aligns with the Phase 1 progression plan in Obsidian (0.5B → 1.5B → 3B local, 7–8B Colab).*
+*Document version: 1.0 — Created for the Caraxis project. Aligns with the Phase 1 progression plan in Obsidian (0.5B → 1.5B → 3B local, 7–8B Colab).*

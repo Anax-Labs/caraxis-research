@@ -1,6 +1,6 @@
-# Craxis Research
+# Caraxis Research
 
-Research and evaluation tooling for **Craxis**, an AI cybersecurity analyst that monitors authorized environments, investigates alerts, maps threats to MITRE ATT&CK, and produces structured security findings.
+Research and evaluation tooling for **Caraxis**, an AI cybersecurity analyst that monitors authorized environments, investigates alerts, maps threats to MITRE ATT&CK, and produces structured security findings.
 
 This repository is the research foundation for Phase 1 (model selection, dataset design, fine-tuning) and the evaluation harness used to measure whether training actually improves analyst behavior.
 
@@ -8,18 +8,18 @@ This repository is the research foundation for Phase 1 (model selection, dataset
 
 | Component | Description |
 |---|---|
-| [`CRAXIS_RESEARCH_ROADMAP.md`](CRAXIS_RESEARCH_ROADMAP.md) | Full research plan: model choice, QLoRA training, dataset strategy, RAG, and Phase 2 agent architecture |
+| [`CARAXIS_RESEARCH_ROADMAP.md`](CARAXIS_RESEARCH_ROADMAP.md) | Full research plan: model choice, QLoRA training, dataset strategy, RAG, and Phase 2 agent architecture |
 | [`evals/`](evals/) | Benchmarks, prompt templates, inference runner, scoring, and comparison reports |
 
 Training scripts and datasets are planned as part of the roadmap; the evaluation harness is ready to use today.
 
-## Craxis-Bench
+## Caraxis-Bench
 
-**Craxis-Bench** is a custom benchmark of security analyst scenarios. It is the primary metric for deciding whether fine-tuning helps — not generic MCQ scores alone.
+**Caraxis-Bench** is a custom benchmark of security analyst scenarios. It is the primary metric for deciding whether fine-tuning helps — not generic MCQ scores alone.
 
 | File | Cases | Purpose |
 |---|---:|---|
-| `evals/craxis_bench_v0.jsonl` | 12 | Primary product benchmark (triage, ATT&CK mapping, vuln analysis, detection explain, incident summary) |
+| `evals/caraxis_bench_v0.jsonl` | 12 | Primary product benchmark (triage, ATT&CK mapping, vuln analysis, detection explain, incident summary) |
 | `evals/golden_set.jsonl` | 5 | Frozen regression set — do not change after first successful fine-tune |
 | `evals/seceval_subset.jsonl` | 10 | Small SecEval-style MCQ subset for knowledge retention checks |
 
@@ -47,7 +47,7 @@ Useful with Ollama, a notebook, or any chat UI:
 
 ```bash
 python evals/run_eval.py \
-  --bench evals/craxis_bench_v0.jsonl \
+  --bench evals/caraxis_bench_v0.jsonl \
   --export-prompts \
   --output evals/runs/prompts.jsonl
 ```
@@ -58,7 +58,7 @@ python evals/run_eval.py \
 
 ```bash
 python evals/run_eval.py \
-  --bench evals/craxis_bench_v0.jsonl \
+  --bench evals/caraxis_bench_v0.jsonl \
   --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit \
   --output evals/runs/base_3b.jsonl
 ```
@@ -105,7 +105,7 @@ See [`evals/README.md`](evals/README.md) for run file format, metrics, and how t
 pip install unsloth
 ```
 
-For local QLoRA fine-tuning (planned), the roadmap recommends an RTX 4050 (6 GB VRAM) or Google Colab for 7B–8B experiments. See [`CRAXIS_RESEARCH_ROADMAP.md`](CRAXIS_RESEARCH_ROADMAP.md) for training configuration.
+For local QLoRA fine-tuning (planned), the roadmap recommends an RTX 4050 (6 GB VRAM) or Google Colab for 7B–8B experiments. See [`CARAXIS_RESEARCH_ROADMAP.md`](CARAXIS_RESEARCH_ROADMAP.md) for training configuration.
 
 ## Metrics
 
@@ -120,7 +120,7 @@ For local QLoRA fine-tuning (planned), the roadmap recommends an RTX 4050 (6 GB 
 
 ### Success bar for the first fine-tune
 
-- Measurable improvement on `craxis_bench_v0.jsonl` vs the base model (target: ≥10% relative gain)
+- Measurable improvement on `caraxis_bench_v0.jsonl` vs the base model (target: ≥10% relative gain)
 - No large regression on `seceval_subset.jsonl`
 - Lower `hallucination` or higher `evidence_rate` on triage cases
 - Golden set scores must not regress after model changes
@@ -128,12 +128,12 @@ For local QLoRA fine-tuning (planned), the roadmap recommends an RTX 4050 (6 GB 
 ## Project structure
 
 ```text
-craxis_theLLM/
+caraxis_theLLM/
 ├── README.md
-├── CRAXIS_RESEARCH_ROADMAP.md    # Research plan and architecture
+├── CARAXIS_RESEARCH_ROADMAP.md    # Research plan and architecture
 └── evals/
     ├── README.md
-    ├── craxis_bench_v0.jsonl     # Primary benchmark
+    ├── caraxis_bench_v0.jsonl     # Primary benchmark
     ├── golden_set.jsonl          # Frozen regression set
     ├── seceval_subset.jsonl      # MCQ knowledge check
     ├── prompts/                  # Per-task prompt templates
@@ -149,7 +149,7 @@ craxis_theLLM/
 Phase 1 focuses on teaching analyst behavior via QLoRA supervised fine-tuning:
 
 - **Base model:** `unsloth/Llama-3.2-3B-Instruct-bnb-4bit`
-- **Dataset:** Craxis-Analyst-v1 (300–500 synthetic instruction pairs)
+- **Dataset:** Caraxis-Analyst-v1 (300–500 synthetic instruction pairs)
 - **Method:** QLoRA + SFT on consumer GPU hardware
 
 Phase 2 adds a minimal AI security analyst prototype:
@@ -158,11 +158,11 @@ Phase 2 adds a minimal AI security analyst prototype:
 Logs → Sigma detection → Alert → Agent (fine-tuned model + RAG) → Investigation JSON → Slack
 ```
 
-The roadmap covers dataset sources (MITRE ATT&CK, NVD, Sigma), license constraints, RAG with ChromaDB, read-only enrichment tools, and adversarial testing. Read [`CRAXIS_RESEARCH_ROADMAP.md`](CRAXIS_RESEARCH_ROADMAP.md) for the full plan.
+The roadmap covers dataset sources (MITRE ATT&CK, NVD, Sigma), license constraints, RAG with ChromaDB, read-only enrichment tools, and adversarial testing. Read [`CARAXIS_RESEARCH_ROADMAP.md`](CARAXIS_RESEARCH_ROADMAP.md) for the full plan.
 
 ## Data and license notes
 
-- **Craxis-Bench** scenarios are synthetic and held out from training.
+- **Caraxis-Bench** scenarios are synthetic and held out from training.
 - **SecEval** and **CTIBench** are evaluation-only — never include them in training data.
 - Production model bases should use commercially licensed checkpoints (e.g. Llama 3.2, Foundation-Sec-8B). See Appendix B in the roadmap for a license quick reference.
 

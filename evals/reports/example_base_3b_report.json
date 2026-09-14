@@ -1,5 +1,5 @@
 {
-  "benchmark": "/home/arynothic/code_arynothic/project/craxis_theLLM/evals/craxis_bench_v0.jsonl",
+  "benchmark": "/home/arynothic/code_arynothic/project/caraxis_theLLM/evals/caraxis_bench_v0.jsonl",
   "run": "evals/runs/example_base_3b.jsonl",
   "missing_cases": [],
   "case_scores": [

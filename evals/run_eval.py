@@ -3,10 +3,10 @@
 
 Usage:
   # Export prompts only (no model required)
-  python evals/run_eval.py --bench evals/craxis_bench_v0.jsonl --export-prompts
+  python evals/run_eval.py --bench evals/caraxis_bench_v0.jsonl --export-prompts
 
   # Run with a HuggingFace / Unsloth model (requires GPU + deps)
-  python evals/run_eval.py --bench evals/craxis_bench_v0.jsonl --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit --output evals/runs/base_3b.jsonl
+  python evals/run_eval.py --bench evals/caraxis_bench_v0.jsonl --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit --output evals/runs/base_3b.jsonl
 """
 
 from __future__ import annotations
@@ -135,8 +135,8 @@ def run_model(bench_path: Path, model_name: str, output_path: Path, max_new_toke
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run Craxis benchmark prompts against a model.")
-    parser.add_argument("--bench", type=Path, default=EVALS_DIR / "craxis_bench_v0.jsonl")
+    parser = argparse.ArgumentParser(description="Run Caraxis benchmark prompts against a model.")
+    parser.add_argument("--bench", type=Path, default=EVALS_DIR / "caraxis_bench_v0.jsonl")
     parser.add_argument("--model", type=str, default=None, help="HF model name or Unsloth checkpoint")
     parser.add_argument("--output", type=Path, default=RUNS_DIR / "run.jsonl")
     parser.add_argument("--max-new-tokens", type=int, default=512)
