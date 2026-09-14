@@ -1,0 +1,66 @@
+[
+  {
+    "id": "T1110.001",
+    "name": "Brute Force: Password Guessing",
+    "tactic": "Credential Access",
+    "description": "Adversaries may use brute force techniques to gain access to accounts when passwords are unknown or when password hashes are obtained.",
+    "detection": "Monitor authentication logs for high volumes of failed logons across multiple accounts or from a single source.",
+    "mitigation": "Use multi-factor authentication and account lockout policies."
+  },
+  {
+    "id": "T1078",
+    "name": "Valid Accounts",
+    "tactic": "Defense Evasion",
+    "description": "Adversaries may obtain and abuse credentials of existing accounts as a means of gaining Initial Access, Persistence, Privilege Escalation, or Defense Evasion.",
+    "detection": "Monitor for unusual login times, impossible travel, and atypical access patterns for user accounts.",
+    "mitigation": "Enforce MFA, least privilege, and strong password policies."
+  },
+  {
+    "id": "T1059.001",
+    "name": "Command and Scripting Interpreter: PowerShell",
+    "tactic": "Execution",
+    "description": "Adversaries may abuse PowerShell commands and scripts for execution of malicious payloads and system discovery.",
+    "detection": "Monitor for encoded PowerShell commands, suspicious parent processes, and unusual script block logging.",
+    "mitigation": "Enable PowerShell logging and constrain execution with application control policies."
+  },
+  {
+    "id": "T1021.001",
+    "name": "Remote Services: Remote Desktop Protocol",
+    "tactic": "Lateral Movement",
+    "description": "Adversaries may use Valid Accounts to log into a computer using the Remote Desktop Protocol (RDP).",
+    "detection": "Monitor for RDP logons from unusual sources, off-hours activity, and failed authentication spikes on port 3389.",
+    "mitigation": "Restrict RDP exposure, require MFA for remote access, and use jump hosts."
+  },
+  {
+    "id": "T1566.002",
+    "name": "Phishing: Spearphishing Link",
+    "tactic": "Initial Access",
+    "description": "Adversaries may send spearphishing messages with a malicious link to elicit sensitive information or deliver malware.",
+    "detection": "Monitor email gateway alerts, suspicious URL clicks, and credential submissions to untrusted domains.",
+    "mitigation": "Deploy email filtering, user awareness training, and URL rewriting."
+  },
+  {
+    "id": "T1558.003",
+    "name": "Steal or Forge Kerberos Tickets: Kerberoasting",
+    "tactic": "Credential Access",
+    "description": "Adversaries may abuse a valid Kerberos ticket-granting ticket to request service tickets for service accounts with SPNs.",
+    "detection": "Monitor for unusual SPN ticket requests and service account authentication anomalies.",
+    "mitigation": "Use strong service account passwords and monitor Kerberos ticket requests."
+  },
+  {
+    "id": "T1530",
+    "name": "Data from Cloud Storage Object",
+    "tactic": "Collection",
+    "description": "Adversaries may access data from cloud storage objects such as S3 buckets or Azure blobs.",
+    "detection": "Monitor for unusual object access, large downloads, and access from new IP addresses.",
+    "mitigation": "Apply least-privilege bucket policies and enable cloud audit logging."
+  },
+  {
+    "id": "T1114.003",
+    "name": "Email Collection: Email Forwarding Rule",
+    "tactic": "Collection",
+    "description": "Adversaries may setup email forwarding rules to collect sensitive information from a user's mailbox.",
+    "detection": "Monitor for new inbox rules, forwarding to external addresses, and impossible travel around mailbox changes.",
+    "mitigation": "Restrict external forwarding and alert on suspicious mailbox rule creation."
+  }
+]

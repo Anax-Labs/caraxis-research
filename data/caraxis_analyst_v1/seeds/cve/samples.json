@@ -1,0 +1,44 @@
+[
+  {
+    "id": "CVE-2021-44228",
+    "description": "Apache Log4j2 JNDI features do not protect against attacker-controlled LDAP and other JNDI-related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code.",
+    "cvss_score": 10.0,
+    "cwe_ids": ["CWE-502", "CWE-917"],
+    "severity": "critical"
+  },
+  {
+    "id": "CVE-2023-23397",
+    "description": "Microsoft Outlook Elevation of Privilege Vulnerability. An attacker could exploit this by sending a specially crafted email that triggers Outlook to connect to an attacker-controlled server, leaking Net-NTLMv2 hashes.",
+    "cvss_score": 9.8,
+    "cwe_ids": ["CWE-294"],
+    "severity": "critical"
+  },
+  {
+    "id": "CVE-2023-4966",
+    "description": "Citrix Bleed vulnerability in NetScaler ADC and Gateway allows sensitive information disclosure via a buffer overflow, potentially exposing session tokens.",
+    "cvss_score": 9.4,
+    "cwe_ids": ["CWE-119", "CWE-200"],
+    "severity": "critical"
+  },
+  {
+    "id": "CVE-2022-22965",
+    "description": "Spring Framework RCE via data binding on JDK 9+ when deployed as a WAR on Tomcat. Remote attackers can execute arbitrary code.",
+    "cvss_score": 9.8,
+    "cwe_ids": ["CWE-94"],
+    "severity": "critical"
+  },
+  {
+    "id": "CVE-2020-1472",
+    "description": "Netlogon Elevation of Privilege Vulnerability (Zerologon). An attacker can establish a vulnerable Netlogon secure channel to a domain controller.",
+    "cvss_score": 10.0,
+    "cwe_ids": ["CWE-330"],
+    "severity": "critical"
+  },
+  {
+    "id": "CVE-2017-0144",
+    "description": "The SMBv1 server in Microsoft Windows allows remote attackers to execute arbitrary code via crafted packets (EternalBlue).",
+    "cvss_score": 8.1,
+    "cwe_ids": ["CWE-20"],
+    "severity": "high"
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "input": "data/caraxis_analyst_v1/raw/clean.jsonl",
+  "output_dir": "/home/arynothic/code_arynothic/project/caraxis_theLLM/data/caraxis_analyst_v1/processed",
+  "train": 405,
+  "val": 49,
+  "test": 47,
+  "by_task": {
+    "train": {
+      "alert_triage": 161,
+      "attack_mapping": 101,
+      "detection_explain": 41,
+      "incident_summary": 21,
+      "vuln_analysis": 81
+    },
+    "val": {
+      "alert_triage": 20,
+      "attack_mapping": 12,
+      "detection_explain": 5,
+      "incident_summary": 2,
+      "vuln_analysis": 10
+    },
+    "test": {
+      "alert_triage": 20,
+      "attack_mapping": 12,
+      "detection_explain": 4,
+      "incident_summary": 2,
+      "vuln_analysis": 9
+    }
+  }
+}

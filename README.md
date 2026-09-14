@@ -9,9 +9,9 @@ This repository is the research foundation for Phase 1 (model selection, dataset
 | Component | Description |
 |---|---|
 | [`CARAXIS_RESEARCH_ROADMAP.md`](CARAXIS_RESEARCH_ROADMAP.md) | Full research plan: model choice, QLoRA training, dataset strategy, RAG, and Phase 2 agent architecture |
+| [`data/caraxis_analyst_v1/`](data/caraxis_analyst_v1/) | Training dataset seeds, generated examples, and processed train/val/test splits |
+| [`scripts/`](scripts/) | Seed fetch, dataset build, validation, and split utilities |
 | [`evals/`](evals/) | Benchmarks, prompt templates, inference runner, scoring, and comparison reports |
-
-Training scripts and datasets are planned as part of the roadmap; the evaluation harness is ready to use today.
 
 ## Caraxis-Bench
 
@@ -32,6 +32,34 @@ Task families covered:
 - **Incident summarization** — executive summary, IOCs, blast radius
 
 Adversarial cases (e.g. prompt injection in log fields) are included from day one.
+
+## Dataset pipeline
+
+Build **Caraxis-Analyst-v1** from ATT&CK, CVE, and Sigma seeds:
+
+```bash
+# Optional: refresh seeds from MITRE + NVD (requires network)
+python scripts/fetch_seeds.py --output-dir data/caraxis_analyst_v1/seeds
+
+# Generate 500 training examples (works offline with bundled seeds)
+python scripts/build_dataset.py --total 500
+
+# Validate and reject benchmark overlaps
+python scripts/validate_dataset.py \
+  data/caraxis_analyst_v1/raw/generated.jsonl \
+  --clean-output data/caraxis_analyst_v1/raw/clean.jsonl
+
+# Split into train/val/test
+python scripts/split_dataset.py --input data/caraxis_analyst_v1/raw/clean.jsonl
+```
+
+Training files: `data/caraxis_analyst_v1/processed/train.jsonl` (405 examples in the default 500-run).
+
+See [`data/caraxis_analyst_v1/README.md`](data/caraxis_analyst_v1/README.md) for record format and task mix.
+
+### Colab notebook
+
+Use [`notebooks/caraxis_finetune_3b_colab.ipynb`](notebooks/caraxis_finetune_3b_colab.ipynb) for end-to-end 3B QLoRA training on Google Colab (install → train → save → download).
 
 ## Quick start
 
@@ -99,6 +127,7 @@ See [`evals/README.md`](evals/README.md) for run file format, metrics, and how t
 | Task | Dependencies |
 |---|---|
 | Scoring and reporting | Python 3.10+ (stdlib only) |
+| Dataset generation | Python 3.10+, PyYAML (`pip install -r requirements-data.txt`) |
 | Model inference (`run_eval.py --model`) | Python 3.11, CUDA GPU, [Unsloth](https://unsloth.ai/) |
 
 ```bash
@@ -131,6 +160,9 @@ For local QLoRA fine-tuning (planned), the roadmap recommends an RTX 4050 (6 GB 
 caraxis_theLLM/
 ├── README.md
 ├── CARAXIS_RESEARCH_ROADMAP.md    # Research plan and architecture
+├── requirements-data.txt          # PyYAML for dataset scripts
+├── data/caraxis_analyst_v1/       # Seeds, raw, processed splits
+├── scripts/                       # fetch_seeds, build_dataset, validate, split
 └── evals/
     ├── README.md
     ├── caraxis_bench_v0.jsonl     # Primary benchmark

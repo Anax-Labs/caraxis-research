@@ -1,0 +1,50 @@
+- title: Suspicious PowerShell Encoded Command
+  id: sigma-powershell-encoded
+  author: caraxis-seed
+  description: Detects PowerShell execution with encoded command arguments often used for obfuscation.
+  logsource:
+    product: windows
+    service: powershell
+  detection:
+    selection:
+      EventID: 4104
+      ScriptBlockText|contains:
+        - '-EncodedCommand'
+        - '-enc '
+    condition: selection
+  mitre:
+    - T1059.001
+    - T1027
+
+- title: Multiple Failed SSH Logins from Single Source
+  id: sigma-ssh-bruteforce
+  author: caraxis-seed
+  description: Detects a high number of failed SSH authentication attempts from one source IP.
+  logsource:
+    product: linux
+    service: sshd
+  detection:
+    selection:
+      failed_password: true
+    filter:
+      count: ">10"
+      timeframe: 5m
+      group_by: source_ip
+    condition: selection
+  mitre:
+    - T1110.001
+
+- title: New Inbox Forwarding Rule Created
+  id: sigma-inbox-forward
+  author: caraxis-seed
+  description: Detects creation of mailbox forwarding rules that may indicate account compromise.
+  logsource:
+    product: m365
+    service: exchange
+  detection:
+    selection:
+      Operation: New-InboxRule
+      Parameters|contains: ForwardTo
+    condition: selection
+  mitre:
+    - T1114.003
