@@ -6,6 +6,38 @@ This document is a practical research roadmap for a **solo developer** with an *
 
 ---
 
+## Current Status (2026-09-15)
+
+Phase 1 v1 is **complete**. The pipeline from dataset → QLoRA fine-tune → Caraxis-Bench evaluation has been run end-to-end.
+
+| Deliverable | Status | Notes |
+|---|---|---|
+| Caraxis-Analyst-v1 | Done | 501 clean examples → 405 train / 49 val / 47 test (`data/caraxis_analyst_v1/processed/`) |
+| Caraxis-Bench v0 | Done | 12 held-out scenarios in `evals/caraxis_bench_v0.jsonl` |
+| QLoRA fine-tune (3B) | Done | Colab T4, 2 epochs on train split; adapter saved as `caraxis_lora_adapter/` |
+| Base vs fine-tuned eval | Done | See [`evalresult.md`](evalresult.md) |
+| LoRA adapter in repo | Excluded | `caraxis_lora_adapter/` is in `.gitignore` (~97 MB); keep a local copy or re-export from Colab |
+| SecEval subset check | Pending | Run `evals/seceval_subset.jsonl` to confirm no knowledge regression |
+| Caraxis-Bench v1 (50+) | Pending | Expand benchmark before dataset v2 training |
+| Caraxis-Analyst-v2 | Pending | Target attack-mapping and CWE failure modes |
+| Phase 2 (RAG + tools) | Pending | Start after SecEval check and benchmark v1 |
+
+### First fine-tune headline results (Caraxis-Bench v0)
+
+| Metric | Base 3B | Fine-tuned | Delta |
+|---|---:|---:|---:|
+| `verdict_correct` (triage) | 0% | **100%** | +100% |
+| `evidence_rate` | 53% | **73%** | +20% |
+| `format_compliance` | 4% | **31%** | +27% |
+| `mitre_f1` | 0% | **31%** | +31% |
+| `detection_rate` (attack mapping) | 56% | 11% | −45% (regression) |
+| `cwe_f1` (vuln analysis) | 0% | 0% | — |
+| `hallucination` | 0% | 0% | — |
+
+**Verdict:** First fine-tune succeeded on the primary product task (alert triage). Attack mapping and CWE need targeted data in v2.
+
+---
+
 ## Executive Summary: The Five Decisions
 
 | Question | Decision |
@@ -13,7 +45,7 @@ This document is a practical research roadmap for a **solo developer** with an *
 | **Which model to start with?** | `unsloth/Llama-3.2-3B-Instruct-bnb-4bit` |
 | **How to train it?** | QLoRA + SFT via Unsloth (not full fine-tuning) |
 | **What dataset to build?** | `Caraxis-Analyst-v1` — 300–500 synthetic instruction pairs teaching analyst behavior |
-| **How to know it worked?** | `Caraxis-Bench` (50 held-out scenarios) + SecEval subset; target ≥10% improvement |
+| **How to know it worked?** | `Caraxis-Bench` (v0: 12 scenarios shipped; v1 target: 50+) + SecEval subset; target ≥10% improvement |
 | **What to build next (Phase 2)?** | Sigma detection → RAG (MITRE/NVD) → 5 read-only tools → agent loop → Slack |
 
 ```mermaid
@@ -21,7 +53,7 @@ flowchart LR
     subgraph phase1 [Phase 1]
         M["Llama-3.2-3B-Instruct\nunsloth bnb-4bit"]
         D["Caraxis-Analyst-v1\n300-500 examples"]
-        B["Caraxis-Bench\n50 held-out scenarios"]
+        B["Caraxis-Bench v0\n12 held-out scenarios"]
         M --> FT["QLoRA SFT\nRTX 4050"]
         D --> FT
         FT --> E["Evaluate vs base\n+ SecEval subset"]
@@ -304,8 +336,8 @@ CyberPal 2.0's SecKnowledge dataset demonstrates the pattern: transform authorit
 
 ### Answer: How many examples should I start with?
 
-- **v1:** 300–500 high-quality examples (enough to prove the pipeline and measure direction)
-- **v2:** 1,500–2,000 after evaluating failure modes
+- **v1:** 300–500 high-quality examples (enough to prove the pipeline and measure direction) — **shipped 501** (405 train / 49 val / 47 test)
+- **v2:** 1,500–2,000 after evaluating failure modes; prioritize attack-mapping and CWE examples
 - **Rule of thumb:** 500 curated examples beat 10,000 noisy ones (consistent with Unsloth guidance and CyberPal findings)
 
 ---
@@ -444,12 +476,26 @@ Build **before** your first training run.
 
 | Property | Specification |
 |---|---|
-| Size | 50–100 held-out analyst scenarios |
-| Tasks | Alert triage, ATT&CK mapping, vuln analysis |
+| Size | 50–100 held-out analyst scenarios (v0 shipped with 12; expand to 50+ for v1) |
+| Tasks | Alert triage, ATT&CK mapping, vuln analysis, detection explain, incident summary |
 | Metrics | Verdict accuracy, ATT&CK F1, evidence citation rate, hallucination rate |
 | Adversarial | 10 scenarios with prompt-injection strings embedded in log fields |
 
 **Success criterion:** ≥10% relative improvement on Caraxis-Bench vs base model, plus measurable gain on SecEval subset, with no major regression on general reasoning.
+
+**v0 results (2026-09-15):** First QLoRA run on Llama-3.2-3B met the success bar for alert triage (`verdict_correct` 0% → 100%, `evidence_rate` +20%). Attack-mapping `detection_rate` regressed; CWE F1 unchanged at 0%. Full report: [`evalresult.md`](evalresult.md). Reproduce with:
+
+```bash
+python evals/run_eval.py --bench evals/caraxis_bench_v0.jsonl \
+  --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit --output evals/runs/base_3b.jsonl
+python evals/run_eval.py --bench evals/caraxis_bench_v0.jsonl \
+  --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit --adapter caraxis_lora_adapter \
+  --output evals/runs/finetuned_3b.jsonl
+python evals/score.py --run evals/runs/base_3b.jsonl --output evals/reports/base_3b_report.json
+python evals/score.py --run evals/runs/finetuned_3b.jsonl --output evals/reports/finetuned_3b_report.json
+python evals/report.py --baseline evals/reports/base_3b_report.json \
+  --candidate evals/reports/finetuned_3b_report.json
+```
 
 #### Layer 3: Qualitative review
 
@@ -509,14 +555,22 @@ Score with exact match on verdict + F1 on technique IDs + checklist on required 
 
 ## 11. What to Do After First Successful Fine-Tune
 
-1. **Export** — Save LoRA adapter; merge to 16-bit or export GGUF (`q4_k_m`) for Ollama
-2. **Benchmark** — Run full Caraxis-Bench + SecEval subset; save results JSON
-3. **Golden set** — Freeze 20 scenarios as permanent regression tests
-4. **Dataset v2** — Fix failure modes; expand to 1,500–2,000 examples
-5. **Scale-up** — Colab: train same dataset on 8B; compare quality vs 3B
-6. **Add RAG** — Chroma + MITRE/NVD (Phase 2 step 1)
-7. **Add tools** — 5 read-only enrichment tools (Phase 2 step 2)
-8. **Wire detection** — Sigma → alert → agent → Slack (Phase 2 step 3)
+| Step | Action | Status |
+|---|---|---|
+| 1 | **Export** — Save LoRA adapter; merge to 16-bit or export GGUF (`q4_k_m`) for Ollama | Done — `caraxis_lora_adapter/` (gitignored; keep local copy) |
+| 2 | **Benchmark** — Run full Caraxis-Bench + SecEval subset; save results JSON | Caraxis-Bench done; SecEval pending |
+| 3 | **Golden set** — Freeze scenarios as permanent regression tests | `evals/golden_set.jsonl` (5 cases) created; expand to 20 |
+| 4 | **Dataset v2** — Fix failure modes (attack mapping, CWE); expand to 1,500–2,000 examples | Next |
+| 5 | **Scale-up** — Colab: train same dataset on 8B; compare quality vs 3B | Next |
+| 6 | **Add RAG** — Chroma + MITRE/NVD (Phase 2 step 1) | Pending |
+| 7 | **Add tools** — 5 read-only enrichment tools (Phase 2 step 2) | Pending |
+| 8 | **Wire detection** — Sigma → alert → agent → Slack (Phase 2 step 3) | Pending |
+
+**v2 dataset priorities** (from v0 eval failures):
+
+- More **attack_mapping** examples with detection ideas and correct technique IDs
+- **vuln_analysis** examples that map CVE → CWE (not just severity)
+- Maintain **alert_triage** quality while rebalancing task mix
 
 ---
 
@@ -708,21 +762,23 @@ Security telemetry is attacker-controlled input. Apply defense-in-depth per [OWA
 ## 15. Step-by-Step Roadmap
 
 ```
-Choose model          →  unsloth/Llama-3.2-3B-Instruct-bnb-4bit
+Choose model          →  unsloth/Llama-3.2-3B-Instruct-bnb-4bit          [done]
         ↓
-Prepare environment   →  Python 3.11, CUDA, Unsloth, W&B
+Prepare environment   →  Python 3.12, CUDA, Unsloth (see requirements-eval.txt) [done]
         ↓
-Collect dataset       →  ATT&CK STIX + NVD + Sigma seeds
+Collect dataset       →  ATT&CK STIX + NVD + Sigma seeds                    [done]
         ↓
-Clean dataset         →  Dedup, decontaminate, schema-validate
+Clean dataset         →  Dedup, decontaminate, schema-validate              [done]
         ↓
-Create benchmark      →  Caraxis-Bench v0 (20 scenarios) BEFORE training
+Create benchmark      →  Caraxis-Bench v0 (12 scenarios) BEFORE training  [done]
         ↓
-Fine-tune             →  QLoRA SFT on RTX 4050 (pilot 50 → full 500)
+Fine-tune             →  QLoRA SFT (Colab T4; 405 train examples)           [done]
         ↓
-Evaluate              →  Base vs fine-tuned on Caraxis-Bench + SecEval subset
+Evaluate              →  Base vs fine-tuned on Caraxis-Bench                [done]
         ↓
-Improve dataset/model →  v2 dataset; re-run on base checkpoint; Colab 8B comparison
+SecEval check         →  Knowledge retention on seceval_subset.jsonl        [next]
+        ↓
+Improve dataset/model →  v2 dataset; Caraxis-Bench v1 (50+); Colab 8B       [next]
         ↓
 Add RAG               →  Chroma + MITRE/NVD corpus
         ↓
@@ -735,31 +791,33 @@ Reach Phase 2         →  End-to-end prototype with eval harness
 
 ### Detailed week-by-week plan
 
-| Week | Focus | Deliverable |
-|---|---|---|
-| 1–2 | Environment + pipeline | 50-example smoke test completes on RTX 4050 |
-| 2–3 | Dataset seeds + pilot | 50-example pilot dataset; seed parsers for ATT&CK/NVD/Sigma |
-| 3 | Benchmark | Caraxis-Bench v0 (20 scenarios) |
-| 3–4 | Fine-tune v1 | 500-example training run; adapter saved |
-| 4–5 | Evaluate + iterate | Evaluation report; dataset v2 plan |
-| 5–6 | Colab scale-up | 3B vs 8B comparison report |
-| 7 | RAG | Chroma index over MITRE + NVD |
-| 8 | Tools + agent | 5 tools wired; agent loop with schema validation |
-| 9–10 | Detection pipeline | Sigma → alert → agent → Slack end-to-end |
-| 10–12 | Polish | Caraxis-Bench v1 (50+ scenarios); adversarial tests |
+| Week | Focus | Deliverable | Status |
+|---|---|---|---|
+| 1–2 | Environment + pipeline | 50-example smoke test completes on RTX 4050 | Done |
+| 2–3 | Dataset seeds + pilot | Seed parsers; 501-example Caraxis-Analyst-v1 | Done |
+| 3 | Benchmark | Caraxis-Bench v0 (12 scenarios) | Done |
+| 3–4 | Fine-tune v1 | 405-example training run; adapter saved | Done |
+| 4–5 | Evaluate + iterate | [`evalresult.md`](evalresult.md); dataset v2 plan | Done (eval); v2 plan next |
+| 5–6 | Colab scale-up | 3B vs 8B comparison report | Next |
+| 7 | RAG | Chroma index over MITRE + NVD | Pending |
+| 8 | Tools + agent | 5 tools wired; agent loop with schema validation | Pending |
+| 9–10 | Detection pipeline | Sigma → alert → agent → Slack end-to-end | Pending |
+| 10–12 | Polish | Caraxis-Bench v1 (50+ scenarios); adversarial tests | Pending |
 
 ---
 
 ## 16. Timeline
 
-| Phase | Duration | Milestone |
-|---|---|---|
-| Environment + pipeline | 1–2 weeks | 50-example smoke test on RTX 4050 |
-| Dataset v1 + benchmark | 1–2 weeks | 500 examples + 50-scenario Caraxis-Bench |
-| Fine-tune + evaluate | 1–2 weeks | Measurable Caraxis-Bench improvement |
-| Scale-up (Colab) | 1 week | 3B vs 8B comparison report |
-| Phase 2 prototype | 3–4 weeks | End-to-end: log → Sigma → agent → Slack |
-| **Total to Phase 2** | **~10–12 weeks** (solo, part-time) | Working analyst prototype |
+| Phase | Duration | Milestone | Status |
+|---|---|---|---|
+| Environment + pipeline | 1–2 weeks | 50-example smoke test on RTX 4050 | Done |
+| Dataset v1 + benchmark | 1–2 weeks | 501 examples + Caraxis-Bench v0 (12 scenarios) | Done |
+| Fine-tune + evaluate | 1–2 weeks | Measurable Caraxis-Bench improvement | Done — triage +100% verdict |
+| SecEval + benchmark v1 | ~1 week | Knowledge check; expand to 50+ scenarios | Next |
+| Dataset v2 + re-train | 1–2 weeks | Attack-mapping and CWE improvements | Next |
+| Scale-up (Colab) | 1 week | 3B vs 8B comparison report | Pending |
+| Phase 2 prototype | 3–4 weeks | End-to-end: log → Sigma → agent → Slack | Pending |
+| **Total to Phase 2** | **~10–12 weeks** (solo, part-time) | Working analyst prototype | ~40% complete |
 
 ---
 
@@ -877,4 +935,4 @@ Reach Phase 2         →  End-to-end prototype with eval harness
 
 ---
 
-*Document version: 1.0 — Created for the Caraxis project. Aligns with the Phase 1 progression plan in Obsidian (0.5B → 1.5B → 3B local, 7–8B Colab).*
+*Document version: 1.1 — Updated 2026-09-15 after Phase 1 v1 fine-tune and Caraxis-Bench v0 evaluation. LoRA adapter stored locally as `caraxis_lora_adapter/` (gitignored).*

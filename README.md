@@ -4,6 +4,20 @@ Research and evaluation tooling for **Caraxis**, an AI cybersecurity analyst tha
 
 This repository is the research foundation for Phase 1 (model selection, dataset design, fine-tuning) and the evaluation harness used to measure whether training actually improves analyst behavior.
 
+## Project status (2026-09-15)
+
+| Milestone | Status |
+|---|---|
+| Caraxis-Analyst-v1 dataset (501 examples → 405 train) | Done |
+| Caraxis-Bench v0 (12 held-out scenarios) | Done |
+| QLoRA fine-tune on Llama-3.2-3B (Colab T4, 2 epochs) | Done |
+| Base vs fine-tuned eval on Caraxis-Bench | Done — see [`evalresult.md`](evalresult.md) |
+| SecEval subset knowledge check | Not run yet |
+| Caraxis-Bench v1 (50+ scenarios) | Planned |
+| Phase 2 (RAG + tools + agent) | Planned |
+
+**LoRA adapter:** saved locally as `caraxis_lora_adapter/` (~97 MB). This directory is in [`.gitignore`](.gitignore) and is not committed — download or copy it from your training run before running fine-tuned inference.
+
 ## What is in this repo
 
 | Component | Description |
@@ -12,6 +26,22 @@ This repository is the research foundation for Phase 1 (model selection, dataset
 | [`data/caraxis_analyst_v1/`](data/caraxis_analyst_v1/) | Training dataset seeds, generated examples, and processed train/val/test splits |
 | [`scripts/`](scripts/) | Seed fetch, dataset build, validation, and split utilities |
 | [`evals/`](evals/) | Benchmarks, prompt templates, inference runner, scoring, and comparison reports |
+| [`notebooks/caraxis_finetune_3b_colab.ipynb`](notebooks/caraxis_finetune_3b_colab.ipynb) | End-to-end 3B QLoRA training notebook for Google Colab |
+| [`evalresult.md`](evalresult.md) | First fine-tune evaluation report (base vs LoRA on Caraxis-Bench v0) |
+
+## First fine-tune results
+
+On **Caraxis-Bench v0** (12 cases), QLoRA on Caraxis-Analyst-v1 produced clear gains on the primary task — alert triage:
+
+| Metric | Base 3B | Fine-tuned | Delta |
+|---|---:|---:|---:|
+| `verdict_correct` | 0% | **100%** | +100% |
+| `evidence_rate` | 53% | **73%** | +20% |
+| `format_compliance` | 4% | **31%** | +27% |
+| `mitre_f1` | 0% | **31%** | +31% |
+| `hallucination` | 0% | 0% | — |
+
+Attack-mapping `detection_rate` regressed (56% → 11%); CWE mapping remains at 0% for both models. Full per-task breakdown: [`evalresult.md`](evalresult.md) and [`evals/reports/comparison.md`](evals/reports/comparison.md).
 
 ## Caraxis-Bench
 
@@ -91,7 +121,15 @@ python evals/run_eval.py \
   --output evals/runs/base_3b.jsonl
 ```
 
-**2. Run the fine-tuned model** (same command, different checkpoint)
+**2. Run the fine-tuned model** (requires local `caraxis_lora_adapter/`)
+
+```bash
+python evals/run_eval.py \
+  --bench evals/caraxis_bench_v0.jsonl \
+  --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit \
+  --adapter caraxis_lora_adapter \
+  --output evals/runs/finetuned_3b.jsonl
+```
 
 **3. Score each run**
 
@@ -128,13 +166,20 @@ See [`evals/README.md`](evals/README.md) for run file format, metrics, and how t
 |---|---|
 | Scoring and reporting | Python 3.10+ (stdlib only) |
 | Dataset generation | Python 3.10+, PyYAML (`pip install -r requirements-data.txt`) |
-| Model inference (`run_eval.py --model`) | Python 3.11, CUDA GPU, [Unsloth](https://unsloth.ai/) |
+| Model inference (`run_eval.py --model`) | Python 3.12, CUDA GPU, see [`requirements-eval.txt`](requirements-eval.txt) |
 
 ```bash
-pip install unsloth
+# Scoring only — no GPU
+python evals/score.py --run evals/runs/base_3b.jsonl
+
+# GPU inference (see requirements-eval.txt for full setup)
+.venv/bin/python evals/run_eval.py \
+  --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit \
+  --adapter caraxis_lora_adapter \
+  --output evals/runs/finetuned_3b.jsonl
 ```
 
-For local QLoRA fine-tuning (planned), the roadmap recommends an RTX 4050 (6 GB VRAM) or Google Colab for 7B–8B experiments. See [`CARAXIS_RESEARCH_ROADMAP.md`](CARAXIS_RESEARCH_ROADMAP.md) for training configuration.
+First fine-tune used Google Colab (T4). Local training on an RTX 4050 (6 GB VRAM) is supported for 3B; see [`CARAXIS_RESEARCH_ROADMAP.md`](CARAXIS_RESEARCH_ROADMAP.md) for configuration and the Colab notebook for a full walkthrough.
 
 ## Metrics
 
@@ -160,29 +205,35 @@ For local QLoRA fine-tuning (planned), the roadmap recommends an RTX 4050 (6 GB 
 caraxis_theLLM/
 ├── README.md
 ├── CARAXIS_RESEARCH_ROADMAP.md    # Research plan and architecture
+├── evalresult.md                  # First fine-tune eval report
+├── .gitignore                     # Excludes caraxis_lora_adapter/ weights
 ├── requirements-data.txt          # PyYAML for dataset scripts
+├── requirements-eval.txt          # Unsloth + torch for GPU inference
 ├── data/caraxis_analyst_v1/       # Seeds, raw, processed splits
 ├── scripts/                       # fetch_seeds, build_dataset, validate, split
+├── notebooks/                     # Colab fine-tuning notebook
+├── caraxis_lora_adapter/          # LoRA weights (local only, gitignored)
 └── evals/
     ├── README.md
-    ├── caraxis_bench_v0.jsonl     # Primary benchmark
-    ├── golden_set.jsonl          # Frozen regression set
-    ├── seceval_subset.jsonl      # MCQ knowledge check
-    ├── prompts/                  # Per-task prompt templates
-    ├── runs/                     # Raw model outputs (JSONL)
-    ├── reports/                  # Scored JSON + comparison markdown
-    ├── run_eval.py               # Prompt export and model inference
-    ├── score.py                  # Score a run against gold labels
-    └── report.py                 # Compare two scored reports
+    ├── caraxis_bench_v0.jsonl     # Primary benchmark (12 cases)
+    ├── golden_set.jsonl           # Frozen regression set (5 cases)
+    ├── seceval_subset.jsonl       # MCQ knowledge check (10 cases)
+    ├── prompts/                   # Per-task prompt templates
+    ├── runs/                      # Raw model outputs (JSONL)
+    ├── reports/                   # Scored JSON + comparison markdown
+    ├── run_eval.py                # Prompt export and model inference
+    ├── score.py                   # Score a run against gold labels
+    └── report.py                  # Compare two scored reports
 ```
 
 ## Research direction
 
-Phase 1 focuses on teaching analyst behavior via QLoRA supervised fine-tuning:
+Phase 1 v1 is complete — QLoRA SFT on Caraxis-Analyst-v1 measurably improved alert triage on Caraxis-Bench v0. Next steps:
 
-- **Base model:** `unsloth/Llama-3.2-3B-Instruct-bnb-4bit`
-- **Dataset:** Caraxis-Analyst-v1 (300–500 synthetic instruction pairs)
-- **Method:** QLoRA + SFT on consumer GPU hardware
+- Expand **Caraxis-Bench** to 50+ scenarios (v1) with more attack-mapping and CWE cases
+- Build **Caraxis-Analyst-v2** with targeted examples for failure modes (attack mapping, CWE)
+- Run **SecEval subset** to confirm no knowledge regression
+- **Colab scale-up:** compare 3B vs 8B on the same dataset
 
 Phase 2 adds a minimal AI security analyst prototype:
 
