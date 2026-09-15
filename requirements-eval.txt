@@ -1,0 +1,8 @@
+# GPU inference for evals/run_eval.py (RTX 4050 6GB+)
+unsloth
+peft
+transformers>=4.57.0,<5
+accelerate
+bitsandbytes
+sentencepiece
+protobuf

@@ -7,6 +7,9 @@ Usage:
 
   # Run with a HuggingFace / Unsloth model (requires GPU + deps)
   python evals/run_eval.py --bench evals/caraxis_bench_v0.jsonl --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit --output evals/runs/base_3b.jsonl
+
+  # Run base + downloaded LoRA adapter
+  python evals/run_eval.py --bench evals/caraxis_bench_v0.jsonl --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit --adapter caraxis_lora_adapter --output evals/runs/finetuned_3b.jsonl
 """
 
 from __future__ import annotations
@@ -82,13 +85,21 @@ def export_prompts(bench_path: Path, output_path: Path) -> None:
     print(f"Exported {len(rows)} prompts to {output_path}")
 
 
-def run_model(bench_path: Path, model_name: str, output_path: Path, max_new_tokens: int) -> None:
+def run_model(
+    bench_path: Path,
+    model_name: str,
+    output_path: Path,
+    max_new_tokens: int,
+    adapter_path: Path | None = None,
+) -> None:
     try:
+        from peft import PeftModel
         from unsloth import FastLanguageModel
         import torch
     except ImportError as exc:
         raise SystemExit(
-            "Unsloth is required for --model runs. Install with: pip install unsloth"
+            "Unsloth + peft are required for --model runs. "
+            "Install with: pip install -r requirements-eval.txt"
         ) from exc
 
     system_prompt = load_text(PROMPTS_DIR / "system.txt")
@@ -97,6 +108,12 @@ def run_model(bench_path: Path, model_name: str, output_path: Path, max_new_toke
         max_seq_length=2048,
         load_in_4bit=True,
     )
+    run_label = model_name
+    if adapter_path is not None:
+        if not adapter_path.exists():
+            raise SystemExit(f"Adapter path not found: {adapter_path}")
+        model = PeftModel.from_pretrained(model, str(adapter_path))
+        run_label = f"{model_name}+{adapter_path.name}"
     FastLanguageModel.for_inference(model)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -125,7 +142,7 @@ def run_model(bench_path: Path, model_name: str, output_path: Path, max_new_toke
             row = {
                 "id": case["id"],
                 "task": case["task"],
-                "model": model_name,
+                "model": run_label,
                 "prediction": prediction.strip(),
             }
             f.write(json.dumps(row) + "\n")
@@ -138,6 +155,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run Caraxis benchmark prompts against a model.")
     parser.add_argument("--bench", type=Path, default=EVALS_DIR / "caraxis_bench_v0.jsonl")
     parser.add_argument("--model", type=str, default=None, help="HF model name or Unsloth checkpoint")
+    parser.add_argument(
+        "--adapter",
+        type=Path,
+        default=None,
+        help="Path to LoRA adapter directory (loads on top of --model base)",
+    )
     parser.add_argument("--output", type=Path, default=RUNS_DIR / "run.jsonl")
     parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument(
@@ -154,7 +177,7 @@ def main() -> None:
     if not args.model:
         raise SystemExit("Provide --model or use --export-prompts")
 
-    run_model(args.bench, args.model, args.output, args.max_new_tokens)
+    run_model(args.bench, args.model, args.output, args.max_new_tokens, args.adapter)
 
 
 if __name__ == "__main__":
