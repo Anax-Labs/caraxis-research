@@ -1,0 +1,171 @@
+{
+  "benchmark": "/home/arynothic/code_arynothic/project/caraxis_theLLM/evals/caraxis_bench_v0.jsonl",
+  "run": "evals/runs/base_3b.jsonl",
+  "missing_cases": [],
+  "case_scores": [
+    {
+      "id": "bench-triage-001",
+      "task": "alert_triage",
+      "verdict_correct": false,
+      "mitre_f1": 0.0,
+      "evidence_rate": 0.6666666666666666,
+      "hallucination": false,
+      "format_compliance": 0.0
+    },
+    {
+      "id": "bench-triage-002",
+      "task": "alert_triage",
+      "verdict_correct": false,
+      "mitre_f1": 0.0,
+      "evidence_rate": 0.6666666666666666,
+      "hallucination": false,
+      "format_compliance": 0.0
+    },
+    {
+      "id": "bench-triage-003",
+      "task": "alert_triage",
+      "verdict_correct": false,
+      "mitre_f1": 0.0,
+      "evidence_rate": 0.0,
+      "hallucination": false,
+      "format_compliance": 0.0
+    },
+    {
+      "id": "bench-triage-004",
+      "task": "alert_triage",
+      "verdict_correct": false,
+      "mitre_f1": 0.0,
+      "evidence_rate": 0.3333333333333333,
+      "hallucination": false,
+      "format_compliance": 0.0
+    },
+    {
+      "id": "bench-triage-005",
+      "task": "alert_triage",
+      "verdict_correct": false,
+      "mitre_f1": 0.0,
+      "evidence_rate": 1.0,
+      "hallucination": false,
+      "format_compliance": 0.0
+    },
+    {
+      "id": "bench-attack-001",
+      "task": "attack_mapping",
+      "mitre_f1": 0.0,
+      "detection_rate": 0.3333333333333333,
+      "hallucination": false,
+      "format_compliance": 0.3333333333333333
+    },
+    {
+      "id": "bench-attack-002",
+      "task": "attack_mapping",
+      "mitre_f1": 0.0,
+      "detection_rate": 1.0,
+      "hallucination": false,
+      "format_compliance": 0.0
+    },
+    {
+      "id": "bench-attack-003",
+      "task": "attack_mapping",
+      "mitre_f1": 0.0,
+      "detection_rate": 0.3333333333333333,
+      "hallucination": false,
+      "format_compliance": 0.0
+    },
+    {
+      "id": "bench-vuln-001",
+      "task": "vuln_analysis",
+      "cwe_f1": 0.0,
+      "severity_correct": true,
+      "remediation_rate": 0.6666666666666666,
+      "hallucination": false
+    },
+    {
+      "id": "bench-vuln-002",
+      "task": "vuln_analysis",
+      "cwe_f1": 0.0,
+      "severity_correct": true,
+      "remediation_rate": 0.6666666666666666,
+      "hallucination": false
+    },
+    {
+      "id": "bench-detect-001",
+      "task": "detection_explain",
+      "concept_rate": 0.75,
+      "mitre_f1": 0.0,
+      "hallucination": false
+    },
+    {
+      "id": "bench-summary-001",
+      "task": "incident_summary",
+      "impact_rate": 0.75,
+      "ioc_rate": 0.0,
+      "mitre_f1": 0.0,
+      "hallucination": false
+    }
+  ],
+  "summary": {
+    "num_cases": 12,
+    "metrics": {
+      "mitre_f1": 0.0,
+      "evidence_rate": 0.5333,
+      "format_compliance": 0.0417,
+      "detection_rate": 0.5556,
+      "cwe_f1": 0.0,
+      "remediation_rate": 0.6667,
+      "concept_rate": 0.75,
+      "impact_rate": 0.75,
+      "ioc_rate": 0.0,
+      "verdict_correct": 0.0,
+      "hallucination": 0.0,
+      "severity_correct": 1.0
+    },
+    "by_task": {
+      "alert_triage": {
+        "num_cases": 5,
+        "metrics": {
+          "mitre_f1": 0.0,
+          "evidence_rate": 0.5333,
+          "format_compliance": 0.0,
+          "verdict_correct": 0.0,
+          "hallucination": 0.0
+        }
+      },
+      "attack_mapping": {
+        "num_cases": 3,
+        "metrics": {
+          "mitre_f1": 0.0,
+          "detection_rate": 0.5556,
+          "format_compliance": 0.1111,
+          "hallucination": 0.0
+        }
+      },
+      "vuln_analysis": {
+        "num_cases": 2,
+        "metrics": {
+          "cwe_f1": 0.0,
+          "remediation_rate": 0.6667,
+          "severity_correct": 1.0,
+          "hallucination": 0.0
+        }
+      },
+      "detection_explain": {
+        "num_cases": 1,
+        "metrics": {
+          "concept_rate": 0.75,
+          "mitre_f1": 0.0,
+          "hallucination": 0.0
+        }
+      },
+      "incident_summary": {
+        "num_cases": 1,
+        "metrics": {
+          "impact_rate": 0.75,
+          "ioc_rate": 0.0,
+          "mitre_f1": 0.0,
+          "hallucination": 0.0
+        }
+      }
+    }
+  }
+}

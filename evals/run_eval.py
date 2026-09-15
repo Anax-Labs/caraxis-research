@@ -93,8 +93,8 @@ def run_model(
     adapter_path: Path | None = None,
 ) -> None:
     try:
+        from unsloth import FastLanguageModel  # must import before peft/transformers
         from peft import PeftModel
-        from unsloth import FastLanguageModel
         import torch
     except ImportError as exc:
         raise SystemExit(

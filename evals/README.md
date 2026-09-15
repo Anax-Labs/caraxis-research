@@ -42,9 +42,15 @@ python evals/run_eval.py \
   --output evals/runs/base_3b.jsonl
 ```
 
-### 2. Run fine-tuned model
+### 2. Run fine-tuned model (LoRA adapter)
 
-Use the same command with your merged model or adapter-loaded checkpoint.
+```bash
+python evals/run_eval.py \
+  --bench evals/caraxis_bench_v0.jsonl \
+  --model unsloth/Llama-3.2-3B-Instruct-bnb-4bit \
+  --adapter caraxis_lora_adapter \
+  --output evals/runs/finetuned_3b.jsonl
+```
 
 ### 3. Score each run
 
